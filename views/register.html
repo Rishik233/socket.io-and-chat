@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title> Maverick </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <h3 style="text-align:center;">Users</h3>
+    <div id="users"></div>
+    <div class="container">
+        <form id="message-form">
+            <p>
+                <label>Email ID</label>
+                <input type="email" class="form-control" id="email" required/>
+            </p>
+            <p>
+                <label>Username</label>
+                <input class="form-control" id="username" required/>
+            </p>
+            <p>
+                <label>Password</label>
+                <input type="password" class="form-control" id="password" required/>
+            </p>
+            <button class="btn btn-primary register" type="submit">Register</button> &nbsp; <br>
+            
+            <div class="display_message container"> </div>
+        </form>
+        <div id="messages"></div>
+    </div>
+    <!-- <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script> -->
+
+
+    <script>
+        $(function () {
+            $('#message-form').on('submit', function (e) {
+                e.preventDefault();
+                var username = $('#username').val();
+                var email = $('#email').val();
+                var password = $('#password').val();
+                $.ajax({
+                    url: "/register",
+                    async: true,
+                    // contentType: 'application/x-www-form-urlencoded',
+                    data: {
+                        username: username, email: email, password: password
+                    },
+                    dataType: 'json',
+                    type: 'POST',
+                    // username: 'username',
+                    // password: 'password',
+                    success: function (result) {
+                        let messageColourClass = "alert-success";
+                        if (result.code !== 200) {
+                            messageColourClass = "alert-danger";
+                        }
+                        let html = ` <div class="alert ` + messageColourClass + ` alert-dismissible">
+                                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                                        <strong> `+ result.message + ` </strong?
+                                     </div>`;
+                        $(".display_message").append(html);
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>

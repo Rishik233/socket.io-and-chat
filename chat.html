@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title> chat </title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" />
+</head>
+
+<body>
+    <h3 style="text-align:center;">Users</h3>
+    <div id="users"></div>
+    <div class="container">
+        <form id="message-form">
+            <p> <label> socket Id</label>
+                <input class="form-control socketIdClass" readonly/>
+                <p>
+                    <label>Username</label>
+                    <input class="form-control" id="username" />
+                </p>
+                <p>
+                    <label>Message</label>
+                    <textarea class="form-control" id="message"></textarea>
+                </p>
+                <button class="btn btn-primary" type="submit">Send</button>
+        </form>
+        <div id="messages"></div>
+    </div>
+    <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+        var acessToken = localStorage.accessToken;;
+        if (typeof (Storage) !== "undefined") {
+            if(acessToken === null || acessToken === '' || acessToken === undefined){
+                window.location.replace("http://localhost:3000/");
+            }
+            var socket = io('http://localhost:3000');
+            socket.on('user.add', function (id) {
+                $(`.socketIdClass`).attr('id', `${id}`).val(`${id}`);
+            });
+            socket.on('user.remove', function (id) {
+                $(`#${id}`).remove();
+            });
+            socket.on('message.sent', function (data) {
+                $('#messages').prepend(`
+                    <div>
+                        <hr />
+                        <div><strong>${data.username}</strong></div>
+                        <p>${data.message}</p>
+                    </div>
+                `);
+            });
+
+            $(function () {
+                $('#message-form').on('submit', function (e) {
+                    e.preventDefault();
+                    socket.emit('message.send', {
+                        message: $('#message').val(),
+                        username: $('#username').val()
+                    });
+                });
+            });
+        } else {
+            alert('browser not supported')
+        }
+    </script>
+
+</body>
+
+</html>
