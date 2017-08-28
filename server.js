@@ -8,6 +8,8 @@ const jwt = require('jsonwebtoken');
 const MongoClient = require('mongodb').MongoClient
     , assert = require('assert');
 const expressValidator = require('express-validator');
+const fileUpload = require('express-fileupload');
+
 
 // Connection URL 
 const url = 'mongodb://localhost:27017/maverick';
@@ -18,6 +20,7 @@ app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(expressValidator());
+app.use(fileUpload({ safeFileNames: true, preserveExtension: true}));
 mongoDb = {};
 
 MongoClient.connect(url, function (err, db) {
@@ -27,7 +30,7 @@ MongoClient.connect(url, function (err, db) {
     } else {
         console.log('MongoDb Connected');
         mongoDb = db;
-        
+
     }
     //  db.close();
 });
@@ -47,6 +50,8 @@ app.get('/chat', (req, res) => {
 
 const AuthController = require('./controllers/Auth/AuthController')(app, express);
 app.use(AuthController);
+const MediaController = require('./controllers/MediaController')(app, express);
+app.use(MediaController);
 
 server = http.Server(app);
 // console.log("process.argv: " + process.argv);
