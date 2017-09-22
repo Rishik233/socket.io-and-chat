@@ -3,6 +3,7 @@ var express = require('express'),
     app = express(),
     http = require('http'),
     socketIO = require('socket.io'),
+    config = require('./config'),
     server, io;
 const jwt = require('jsonwebtoken');
 const MongoClient = require('mongodb').MongoClient
@@ -10,20 +11,21 @@ const MongoClient = require('mongodb').MongoClient
 const expressValidator = require('express-validator');
 const fileUpload = require('express-fileupload');
 
-
-// Connection URL 
-const url = 'mongodb://localhost:27017/maverick';
-
 var bodyParser = require('body-parser');
 // app.use(morgan('combined'));
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(expressValidator());
-app.use(fileUpload({ safeFileNames: true, preserveExtension: true}));
+app.use(fileUpload({ safeFileNames: true, preserveExtension: true }));
 mongoDb = {};
+var elasticsearch = require('elasticsearch');
+var client = new elasticsearch.Client({
+    host: config.elastic,
+    log: 'trace'
+});
 
-MongoClient.connect(url, function (err, db) {
+MongoClient.connect(config.mongoDb, function (err, db) {
     if (err) {
         console.error(err);
         throw err;
@@ -36,6 +38,15 @@ MongoClient.connect(url, function (err, db) {
 });
 
 app.get('/', function (req, res) {
+    client.ping({
+        requestTimeout: 30000,
+    }, function (error) {
+        if (error) {
+            console.error('elasticsearch cluster is down!');
+        } else {
+            console.log('All is well');
+        }
+    });
     res.sendFile(__dirname + '/index.html');
 });
 
@@ -52,6 +63,8 @@ const AuthController = require('./controllers/Auth/AuthController')(app, express
 app.use(AuthController);
 const MediaController = require('./controllers/MediaController')(app, express);
 app.use(MediaController);
+const SearchController = require('./controllers/Search/SearchController')(app, express);
+app.use(SearchController);
 
 server = http.Server(app);
 // console.log("process.argv: " + process.argv);
