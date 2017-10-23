@@ -10,7 +10,6 @@ const MongoClient = require('mongodb').MongoClient
     , assert = require('assert');
 const expressValidator = require('express-validator');
 const fileUpload = require('express-fileupload');
-
 var bodyParser = require('body-parser');
 // app.use(morgan('combined'));
 app.use(morgan('dev'));
@@ -19,11 +18,23 @@ app.use(bodyParser.json());
 app.use(expressValidator());
 app.use(fileUpload({ safeFileNames: true, preserveExtension: true }));
 mongoDb = {};
+client = {};
 var elasticsearch = require('elasticsearch');
-var client = new elasticsearch.Client({
+client = new elasticsearch.Client({
     host: config.elastic,
     log: 'trace'
 });
+try {
+    client.cluster.health({}, function (err, resp, status) {
+        if (err) {
+            console.log("error, could not connect to elasic search", err);
+        } else {
+            console.log(resp);
+        }
+    });
+} catch (exception) {
+    console.log("exception occured while connection to elastic search cluster", exception);
+}
 
 MongoClient.connect(config.mongoDb, function (err, db) {
     if (err) {
@@ -54,17 +65,18 @@ app.get('/chat', (req, res) => {
     res.sendFile(__dirname + '/chat.html');
 });
 
-// app.get('/register', (req, res) => {
-//     res.sendFile(__dirname + 'register.html');
-
-// });
-
 const AuthController = require('./controllers/Auth/AuthController')(app, express);
 app.use(AuthController);
 const MediaController = require('./controllers/MediaController')(app, express);
 app.use(MediaController);
 const SearchController = require('./controllers/Search/SearchController')(app, express);
 app.use(SearchController);
+const ProductsController = require('./controllers/Product/ProductsController')(app, express);
+app.use(ProductsController);
+const imageProcessing = require('./controllers/ImageProcessing')(app, express);
+app.use(imageProcessing);
+const getMapping = require('./controllers/Search/getMappings')(app, express);
+app.use(getMapping);
 
 server = http.Server(app);
 // console.log("process.argv: " + process.argv);
