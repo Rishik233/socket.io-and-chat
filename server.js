@@ -5,6 +5,7 @@ var express = require('express'),
     socketIO = require('socket.io'),
     config = require('./config'),
     server, io;
+var cors = require('cors');
 const jwt = require('jsonwebtoken');
 const MongoClient = require('mongodb').MongoClient
     , assert = require('assert');
@@ -17,6 +18,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(expressValidator());
 app.use(fileUpload({ safeFileNames: true, preserveExtension: true }));
+app.use(cors());
 mongoDb = {};
 client = {};
 var elasticsearch = require('elasticsearch');
@@ -36,17 +38,21 @@ try {
     console.log("exception occured while connection to elastic search cluster", exception);
 }
 
-MongoClient.connect(config.mongoDb, function (err, db) {
-    if (err) {
-        console.error(err);
-        throw err;
-    } else {
-        console.log('MongoDb Connected');
-        mongoDb = db;
+try {
+    MongoClient.connect(config.mongoDb, function (err, db) {
+        if (err) {
+            console.error(err);
+            // throw err;
+        } else {
+            console.log('MongoDb Connected');
+            mongoDb = db;
 
-    }
-    //  db.close();
-});
+        }
+        //  db.close();
+    });
+} catch (exception) {
+    console.log(excception);
+}
 
 app.get('/', function (req, res) {
     client.ping({
@@ -77,6 +83,8 @@ const imageProcessing = require('./controllers/ImageProcessing')(app, express);
 app.use(imageProcessing);
 const getMapping = require('./controllers/Search/getMappings')(app, express);
 app.use(getMapping);
+const TimeZoneController = require('./controllers/TimeZoneController')(app, express);
+app.use(TimeZoneController);
 
 server = http.Server(app);
 // console.log("process.argv: " + process.argv);

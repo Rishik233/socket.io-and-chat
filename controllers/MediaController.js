@@ -15,7 +15,9 @@ let videoStitch = require('video-stitch');
 let videoConcat = videoStitch.concat;
 let videoMerge = videoStitch.merge;
 const promise = require('promise');
-
+const ffprobePath = require('@ffprobe-installer/ffprobe').path;
+const ffmpeg = require('fluent-ffmpeg');
+ffmpeg.setFfprobePath(ffprobePath);
 module.exports = function (app, express) {
     var Router = express.Router();
 
@@ -216,7 +218,8 @@ module.exports = function (app, express) {
      * api to concatenate two videos
      */
 
-    Router.get('/joinVideos', (req, res) => {
+    Router.post('/joinVideos', (req, res) => {
+        // return res.status(200).send({ msg: "hello" });
         //url 
         //https://res.cloudinary.com/dkcefcqnr/video/upload/w_640,h_360,c_fill/l_video:adkxs8ysm1uj7hqeeaz4,fl_splice,w_640,h_360,c_fill/akqp5rcrnpthznrst36b.mp4
         // cloudinary.video("akqp5rcrnpthznrst36b", {
@@ -228,6 +231,26 @@ module.exports = function (app, express) {
 
         // https://res.cloudinary.com/demo/video/upload/w_300,h_200,c_fill/l_video:dog,fl_splice,w_300,h_200,c_fill/l_video:kitten_fighting,f1_splice,w_300,h_200,c_fill/dog.mp4
         // https://res.cloudinary.com/dkcefcqnr/video/upload/w_640,h_360,c_fill/l_video:adkxs8ysm1uj7hqeeaz4,fl_splice,w_640,h_360,c_fill/l_video:akqp5rcrnpthznrst36b,f1_splice,w_640,h_360,c_fill/vudzlrldlbzn2lyzfz0f.mp4
+        // ffmpeg.setFfprobePath("D:/Softwares/Installed/ffmpeg/bin/ffprobe.exe");
+        var proc = new ffmpeg({ source: "C:/Users/admin/Videos/Video/Befikre - Releasing 9 December 2016 - Ranveer Singh - Vaani Kapoor.mp4" })
+            .mergeAdd("C:/Users/admin/Videos/Video/Angry Elephant Attack In palakkad kerala,India, Damaging 27 Vehicles ,Car, Bike & Auto-ZP0YZQseAFU.mp4")
+            .mergeToFile("out.mp4", "/", function () {
+                console.log('files has been merged succesfully');
+                return res.send('files has been merged succesfully');
+            });
+
+        // ffmpeg('C:/Users/admin/Videos/Video/1.mp4')
+        //     .input('C:/Users/admin/Videos/Video/1.mp4')
+        //     .input('C:/Users/admin/Videos/Video/2.mp4')
+        //     .on('error', function (err) {
+        //         console.log('An error occurred: ' + err.message);
+        //         return res.send(err);
+        //     })
+        //     .on('end', function () {
+        //         console.log('Merging finished !');
+        //         return res.send('merged');
+        //     })
+        //     .mergeToFile('C:/Users/admin/Videos/Video/merged.mp4', 'C:/Users/admin/Videos/Video');
     });
 
 
