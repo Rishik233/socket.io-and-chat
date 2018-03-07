@@ -4,4 +4,4 @@
 1.) Download the repository
 # $ npm install
 # $ npm install -g nodemon 
-# $ npm starte
+# $ npm start
