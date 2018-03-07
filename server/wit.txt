@@ -1,0 +1,3 @@
+curl \
+ -H 'Authorization: Bearer J7DF657G4GBMCEHKUD4RA3GES4VCDCZ6' \
+ 'https://api.wit.ai/message?v=07/02/2018&q='
