@@ -4,4 +4,4 @@
 1.) Download the repository
 # $ npm install
 # $ npm install -g nodemon 
-# $ nodemon server.js 3000
+# $ npm start
